@@ -20,6 +20,7 @@ tr.sec td{background:var(--hd);font-weight:700;text-align:left}td.t{font-weight:
 <div class="row">
 <div><label>មណ្ឌលសុខភាព</label><select id="hc"></select></div>
 <div><label>ឆ្នាំ</label><select id="year"></select></div>
+<div><label>ខែ</label><select id="month"></select></div>
 <div><label>លេខកូដចូលប្រើ</label><input id="code" type="password" autocomplete="off"></div>
 <button class="go" id="load">បង្ហាញរបាយការណ៍</button><button id="prt">បោះពុម្ព</button><a href="index.html" style="padding:8px;color:var(--acc)">← ត្រឡប់ទៅបញ្ចូលទិន្នន័យ</a><span id="msg"></span>
 </div>
@@ -30,31 +31,35 @@ const HC=["(ឈ្មោះ ១)", "(ឈ្មោះ ២)", "(ឈ្មោះ �
 const YEARS=['2026','2027','2028'],MONTHS=['មករា','កុម្ភៈ','មីនា','មេសា','ឧសភា','មិថុនា','កក្កដា','សីហា','កញ្ញា','តុលា','វិច្ឆិកា','ធ្នូ'];
 const $=id=>document.getElementById(id);let rows=[],tab=0;
 $('hc').innerHTML='<option value="">ទាំងអស់ (បូកសរុប)</option>'+HC.map(x=>`<option>${x}</option>`).join('');
-$('year').innerHTML=YEARS.map(x=>`<option>${x}</option>`).join('');$('code').value=localStorage.getItem('mch_code')||'';
+$('year').innerHTML=YEARS.map(x=>`<option>${x}</option>`).join('');$('month').innerHTML='<option value="">ទាំងអស់ (១២ ខែ)</option>'+MONTHS.map(x=>`<option>${x}</option>`).join('');$('code').value=localStorage.getItem('mch_code')||'';
 $('tabs').innerHTML=PROGS.map((p,i)=>`<button data-t="${i}">${p.code}</button>`).join('')+'<button data-t="s">ស្ថានភាពបញ្ជូន</button>';
 function say(t,c){$('msg').textContent=t;$('msg').className=c||''}
 async function load(){
  if(API_URL.startsWith('PASTE'))return say('មិនទាន់កំណត់ API_URL។','err');
  say('កំពុងផ្ទុក...');
  try{const r=await(await fetch(API_URL+'?'+new URLSearchParams({action:'report',year:$('year').value,code:$('code').value}))).json();
-  if(r.error)return say(r.error,'err');rows=r.rows;localStorage.setItem('mch_code',$('code').value);say(`ទទួលបាន ${rows.length} ការបញ្ជូន`);render()
+  if(r.error)return say(r.error,'err');
+  if(!Array.isArray(r.rows))return say('Code.gs នៅជា Version ចាស់ — ត្រូវ Paste កូដថ្មី ហើយ Deploy → Manage deployments → Edit → New version។','err');
+  const N=x=>String(x==null?'':x).trim();rows=r.rows.map(x=>({hc:N(x.hc),month:N(x.month),values:x.values||{}}));localStorage.setItem('mch_code',$('code').value);render();
+  say(rows.length?`ទទួលបាន ${rows.length} ការបញ្ជូន ក្នុងឆ្នាំ ${$('year').value} · មណ្ឌល: ${[...new Set(rows.map(x=>x.hc))].length} · ខែ: ${[...new Set(rows.map(x=>x.month))].join(', ')}`:`គ្មានទិន្នន័យសម្រាប់ឆ្នាំ ${$('year').value} ក្នុងសន្លឹក Data (ពិនិត្យឆ្នាំ)`,rows.length?'':'err')
  }catch(e){say('មិនអាចផ្ទុកទិន្នន័យបាន។','err')}}
-function sel(){const h=$('hc').value;return h?rows.filter(r=>r.hc===h):rows}
+function sel(){const h=$('hc').value.trim();return h?rows.filter(r=>r.hc===h):rows}
 function val(rs,id){let s=0,n=0;rs.forEach(r=>{const v=r.values[id];if(v!==undefined&&v!==''){s+=Number(v);n++}});return n?Math.round(s*100)/100:''}
 function render(){
  document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t==tab));
- const h=$('hc').value;$('ttl').textContent='របាយការណ៍សូចនាករ MCH — '+(h||'មណ្ឌលសុខភាពទាំងអស់ (បូកសរុប)')+' — ឆ្នាំ '+$('year').value;
+ const h=$('hc').value;$('ttl').textContent='របាយការណ៍សូចនាករ MCH — '+(h||'មណ្ឌលសុខភាពទាំងអស់ (បូកសរុប)')+' — '+($('month').value?'ខែ'+$('month').value+' ':'')+'ឆ្នាំ '+$('year').value;
+ if(rows.length&&$('hc').value&&!sel().length)say('មណ្ឌលនេះគ្មានទិន្នន័យក្នុងឆ្នាំនេះ។ ឈ្មោះក្នុង Sheet: '+[...new Set(rows.map(x=>x.hc))].slice(0,5).join(' | ')+' …','err');
  if(tab==='s')return status();
- const p=PROGS[tab],rs=sel();
- let t='<tr><th class="i" rowspan="2">សូចនាករ</th>'+MONTHS.map(m=>`<th colspan="2">${m}</th>`).join('')+'<th colspan="2">សរុប</th></tr><tr>'+'<th>ចំនួន</th><th>គោលដៅ</th>'.repeat(13)+'</tr>';
+ const p=PROGS[tab],rs=sel(),ms=$('month').value?[$('month').value]:MONTHS,one=ms.length===1;
+ let t='<tr><th class="i" rowspan="2">សូចនាករ</th>'+ms.map(m=>`<th colspan="2">${m}</th>`).join('')+(one?'':'<th colspan="2">សរុប</th>')+'</tr><tr>'+'<th>ចំនួន</th><th>គោលដៅ</th>'.repeat(ms.length+(one?0:1))+'</tr>';
  let last='';
  p.items.forEach((it,k)=>{
-  if(it.sec!==last){t+=`<tr class="sec"><td class="i" colspan="27">${it.sec}</td></tr>`;last=it.sec}
+  if(it.sec!==last){t+=`<tr class="sec"><td class="i" colspan="${2*ms.length+(one?0:2)+1}">${it.sec}</td></tr>`;last=it.sec}
   const id=`${p.code}_${k+1}`;let c=0,g=0,hc=0,hg=0;
   t+=`<tr><td class="i">${it.no}. ${it.name}</td>`;
-  MONTHS.forEach(m=>{const mr=rs.filter(r=>r.month===m);const a=val(mr,id+'_c'),b=val(mr,id+'_t');
+  ms.forEach(m=>{const mr=rs.filter(r=>r.month===m);const a=val(mr,id+'_c'),b=val(mr,id+'_t');
    if(a!=='')c+=a,hc=1;if(b!=='')g+=b,hg=1;t+=`<td>${a}</td><td>${b}</td>`});
-  t+=it.nt?'<td class="t"></td><td class="t"></td>':`<td class="t">${hc?Math.round(c*100)/100:''}</td><td class="t">${hg?Math.round(g*100)/100:''}</td>`;
+  if(!one)t+=it.nt?'<td class="t"></td><td class="t"></td>':`<td class="t">${hc?Math.round(c*100)/100:''}</td><td class="t">${hg?Math.round(g*100)/100:''}</td>`;
   t+='</tr>'});
  $('tb').innerHTML=t}
 function status(){
@@ -64,7 +69,8 @@ function status(){
  $('tb').innerHTML=t}
 $('tabs').onclick=e=>{const b=e.target.closest('button');if(b){tab=b.dataset.t==='s'?'s':+b.dataset.t;render()}};
 const qp=new URLSearchParams(location.search);
-if(qp.get('hc'))$('hc').value=qp.get('hc');if(qp.get('year'))$('year').value=qp.get('year');
+if(qp.get('hc'))$('hc').value=qp.get('hc');if(qp.get('year'))$('year').value=qp.get('year');if(qp.get('month'))$('month').value=qp.get('month');
 if(qp.has('year')&&$('code').value)load();
-$('hc').onchange=render;$('load').onclick=load;$('prt').onclick=()=>window.print();
+render();
+$('hc').onchange=$('month').onchange=render;$('load').onclick=load;$('prt').onclick=()=>window.print();
 </script></body></html>
