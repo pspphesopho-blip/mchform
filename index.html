@@ -58,7 +58,7 @@ async function load(){
   if(r.found){inputs.forEach(i=>{if(r.values[i.dataset.id]!==undefined)i.value=r.values[i.dataset.id]});say('បានផ្ទុកទិន្នន័យដែលបានបញ្ជូនពីមុន។ អាចកែហើយបញ្ជូនម្តងទៀត។','ok')}else say('')
  }catch(e){say('មិនអាចផ្ទុកទិន្នន័យបាន។','err')}}
 ['hc','year','month'].forEach(i=>$(i).onchange=load);
-$('rep').onclick=()=>{localStorage.setItem('mch_code',$('code').value);$('rep').href='report.html?'+new URLSearchParams({hc:$('hc').value,year:$('year').value})};
+$('rep').onclick=()=>{localStorage.setItem('mch_code',$('code').value);$('rep').href='report.html?'+new URLSearchParams({hc:$('hc').value,year:$('year').value,month:$('month').value})};
 $('send').onclick=async()=>{
  if(!ready())return say('សូមជ្រើសរើសមណ្ឌលសុខភាព ឆ្នាំ និងខែ។','err');
  if(API_URL.startsWith('PASTE'))return say('មិនទាន់កំណត់ API_URL។','err');
