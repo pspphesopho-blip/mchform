@@ -1,0 +1,71 @@
+<!doctype html><html lang="km"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>របាយការណ៍សូចនាករ MCH</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f7f4;--fg:#1d2b1f;--card:#fff;--acc:#2e7d32;--line:#cbd6cb;--in:#fff8dc;--mut:#5d6d5f}
+@media(prefers-color-scheme:dark){:root{--bg:#131a14;--fg:#e8efe8;--card:#1c261d;--acc:#66bb6a;--line:#38463a;--in:#3b3520;--mut:#9fb0a1}}
+*{box-sizing:border-box}body{margin:0;font-family:'Noto Sans Khmer','Khmer OS Siemreap',sans-serif;background:var(--bg);color:var(--fg);line-height:1.6}
+main{max-width:980px;margin:0 auto;padding:16px}h1{font-size:1.25rem;margin:.2rem 0 1rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:14px}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+label{font-size:.85rem;color:var(--mut);display:block}select,input{width:100%;padding:8px;border:1px solid var(--line);border-radius:6px;font:inherit;background:var(--card);color:var(--fg)}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}.tabs button{padding:8px 14px;border:1px solid var(--line);border-radius:20px;background:var(--card);color:var(--fg);font:inherit;cursor:pointer}
+.tabs button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+table{width:100%;border-collapse:collapse}th,td{border-bottom:1px solid var(--line);padding:6px;text-align:left;vertical-align:middle}th{font-size:.85rem;color:var(--mut)}
+td.n{width:36px;color:var(--mut)}td.v{width:120px}td.v input{background:var(--in);text-align:right}td.v input:disabled{background:transparent}
+.sec td{background:var(--bg);font-weight:700}
+.bar{position:sticky;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+button.go{background:var(--acc);color:#fff;border:0;border-radius:8px;padding:10px 22px;font:inherit;font-weight:700;cursor:pointer}button.go:disabled{opacity:.5}
+#msg{flex:1;min-width:200px}.ok{color:var(--acc)}.err{color:#c62828}
+@media(max-width:600px){td.v{width:84px}}
+</style></head><body><main>
+<h1>របាយការណ៍សូចនាករសុខភាពមាតា ទារក កុមារ និងអាហារូបត្ថម្ភ</h1>
+<div class="card"><div class="row">
+<div><label>មណ្ឌលសុខភាព *</label><select id="hc"></select></div>
+<div><label>ឆ្នាំ *</label><select id="year"></select></div>
+<div><label>ខែ *</label><select id="month"></select></div>
+<div><label>លេខកូដចូលប្រើ *</label><input id="code" type="password" autocomplete="off"></div>
+</div><p style="font-size:.85rem;color:var(--mut);margin:.6rem 0 0">១ ការបញ្ជូន = ១ មណ្ឌលសុខភាព ១ ខែ។ ទុកទទេបើគ្មានទិន្នន័យ។ បញ្ជូនម្តងទៀតសម្រាប់ខែដដែល នឹងជំនួសទិន្នន័យចាស់។</p></div>
+<div class="tabs" id="tabs"></div><div class="card" id="panels"></div>
+<div class="bar"><button class="go" id="send">បញ្ជូនទិន្នន័យ</button><a class="go" id="rep" href="report.html" style="text-decoration:none;padding:10px 22px;border-radius:8px;background:transparent;color:var(--acc);border:2px solid var(--acc)">មើលរបាយការណ៍ ›</a><span id="msg"></span></div>
+</main><script>
+const API_URL='https://script.google.com/macros/s/AKfycbx3oueIbiuJ5G8YpqH69lUvVCJC181z5d9WwPxfEdNSOIY7JWGeJ3IBm2k39iR1rbPh/exec';
+const HC=["(ឈ្មោះ ១)", "(ឈ្មោះ ២)", "(ឈ្មោះ ៣)", "(ឈ្មោះ ៤)", "(ឈ្មោះ ៥)", "(ឈ្មោះ ៦)", "(ឈ្មោះ ៧)", "(ឈ្មោះ ៨)", "(ឈ្មោះ ៩)", "(ឈ្មោះ ១០)", "(ឈ្មោះ ១១)", "(ឈ្មោះ ១២)", "(ឈ្មោះ ១៣)", "(ឈ្មោះ ១៤)", "(ឈ្មោះ ១៥)", "(ឈ្មោះ ១៦)", "(ឈ្មោះ ១៧)", "(ឈ្មោះ ១៨)", "(ឈ្មោះ ១៩)", "(ឈ្មោះ ២០)", "(ឈ្មោះ ២១)", "(ឈ្មោះ ២២)", "(ឈ្មោះ ២៣)", "(ឈ្មោះ ២៤)", "(ឈ្មោះ ២៥)", "(ឈ្មោះ ២៦)", "(ឈ្មោះ ២៧)", "(ឈ្មោះ ២៨)", "(ឈ្មោះ ២៩)", "(ឈ្មោះ ៣០)", "(ឈ្មោះ ៣១)", "(ឈ្មោះ ៣២)", "(ឈ្មោះ ៣៣)", "(ឈ្មោះ ៣៤)", "(ឈ្មោះ ៣៥)", "(ឈ្មោះ ៣៦)", "(ឈ្មោះ ៣៧)", "(ឈ្មោះ ៣៨)", "(ឈ្មោះ ៣៩)", "(ឈ្មោះ ៤០)", "(ឈ្មោះ ៤១)", "(ឈ្មោះ ៤២)", "(ឈ្មោះ ៤៣)", "(ឈ្មោះ ៤៤)", "(ឈ្មោះ ៤៥)", "(ឈ្មោះ ៤៦)", "(ឈ្មោះ ៤៧)", "(ឈ្មោះ ៤៨)", "(ឈ្មោះ ៤៩)", "(ឈ្មោះ ៥០)", "(ឈ្មោះ ៥១)", "(ឈ្មោះ ៥២)", "(ឈ្មោះ ៥៣)", "(ឈ្មោះ ៥៤)", "(ឈ្មោះ ៥៥)", "(ឈ្មោះ ៥៦)"], PROGS=[{"code": "NIP", "items": [{"sec": "កម្មវិធីជាតិផ្តល់ថ្នាំបង្ការ", "no": 1, "name": "កុមារបានទទួលថ្នាំបង្ការជំងឺរបេង (BCG)"}, {"sec": "កម្មវិធីជាតិផ្តល់ថ្នាំបង្ការ", "no": 2, "name": "កុមារបានទទួលថ្នាំបង្ការជំងឺរលាកថ្លើមប្រភេទបេ (HepB)"}, {"sec": "កម្មវិធីជាតិផ្តល់ថ្នាំបង្ការ", "no": 3, "name": "កុមារបានទទួលថ្នាំបង្ការជំងឺខាន់ស្លាក់ តេតាណូស ក្អកមាន់ រលាកថ្លើមប្រភេទបេ និងរលាកសួតដោយហ៊ីប ដូសទី១ (DTP1)"}, {"sec": "កម្មវិធីជាតិផ្តល់ថ្នាំបង្ការ", "no": 4, "name": "កុមារបានទទួលថ្នាំបង្ការជំងឺខាន់ស្លាក់ តេតាណូស ក្អកមាន់ រលាកថ្លើមប្រភេទបេ និងរលាកសួតដោយហ៊ីប ដូសទី៣ (DTP3)"}, {"sec": "កម្មវិធីជាតិផ្តល់ថ្នាំបង្ការ", "no": 5, "name": "កុមារបានទទួលថ្នាំបង្ការជំងឺកញ្ជ្រឹល​ ស្អូច ដូសទី១ (MR1)"}, {"sec": "កម្មវិធីជាតិផ្តល់ថ្នាំបង្ការ", "no": 6, "name": "កុមារបានទទួលថ្នាំបង្ការជំងឺកញ្ជ្រឹល​ ស្អូច ដូសទី២ (MR2)"}, {"sec": "កម្មវិធីជាតិផ្តល់ថ្នាំបង្ការ", "no": 7, "name": "កុមារខកខានមិនបានទទួលថ្នាំបង្ការជំងឺខាន់ស្លាក់ តេតាណូស ក្អកមាន់ រលាកថ្លើមប្រភេទបេ និងរលាកសួតដោយហ៊ីប ដូសទី១ (កុមារ Zero-dose)"}, {"sec": "កម្មវិធីជាតិផ្តល់ថ្នាំបង្ការ", "no": 8, "name": "កុមារបានទទួលថ្នាំបង្ការតាមតំបន់ដាច់ស្រយាល"}, {"sec": "កម្មវិធីជាតិ ARI/CDD", "no": 1, "name": "ចំនួនកុមារដែលបានពិនិត្យជំងឺក្រៅ"}, {"sec": "កម្មវិធីជាតិ ARI/CDD", "no": 2, "name": "ចំនួនកុមារទទួលស.ព.ជ.ក ករណីសរុប (IMCI)"}, {"sec": "កម្មវិធីជាតិ ARI/CDD", "no": 3, "name": "ការមកពិគ្រោះជំងឺករណីថ្មីលើកុមារអាយុក្រោម ៥ឆ្នំាម្នាក់ក្នុងមួយខែ/ឆ្នំា (ចំនួនលើក)"}], "title": "NIP — កម្មវិធីជាតិផ្តល់ថ្នាំបង្ការ និង ARI/CDD"}, {"code": "NRHP", "items": [{"sec": "កម្មវិធីជាតិសុខភាពបន្តពូជ", "no": 1, "name": "ពិនិត្យផ្ទៃពោះលើកទី២"}, {"sec": "កម្មវិធីជាតិសុខភាពបន្តពូជ", "no": 2, "name": "ពិនិត្យផ្ទៃពោះលើកទី៤"}, {"sec": "កម្មវិធីជាតិសុខភាពបន្តពូជ", "no": 3, "name": "ពិនិត្យផ្ទៃពោះមិនតាមកំណត់"}, {"sec": "កម្មវិធីជាតិសុខភាពបន្តពូជ", "no": 4, "name": "ស្រ្តីមានផ្ទៃពោះមានហានិភ័យបានបញ្ជូន"}, {"sec": "កម្មវិធីជាតិសុខភាពបន្តពូជ", "no": 5, "name": "ស្រ្តីមានផ្ទៃពោះមានហានិភ័យ មកពិនិត្យតានដានបន្ត"}, {"sec": "កម្មវិធីជាតិសុខភាពបន្តពូជ", "no": 6, "name": "សម្រាលនៅមណ្ឌលសុខភាព"}, {"sec": "កម្មវិធីជាតិសុខភាពបន្តពូជ", "no": 7, "name": "សម្រាលដោយបុគ្គលិកសុខាភិបាល"}, {"sec": "កម្មវិធីជាតិសុខភាពបន្តពូជ", "no": 8, "name": "ពិនិត្យក្រោយសម្រាលលើកទី១"}, {"sec": "កម្មវិធីជាតិសុខភាពបន្តពូជ", "no": 9, "name": "កំពុងបន្តប្រើមធ្យោបាយពន្យារកំណើត"}], "title": "NRHP — កម្មវិធីជាតិសុខភាពបន្តពូជ"}, {"code": "NNP", "items": [{"sec": "កម្មវិធីជាតិអាហាររូបត្ថម្ភ", "no": 1, "name": "ចំនួនទារកដែលបានបៅដោះ​ម្តាយ​ក្នុងម៉ោងដំបូង​បន្ទាប់​ពី​សម្រាល"}, {"sec": "កម្មវិធីជាតិអាហាររូបត្ថម្ភ", "no": 2, "name": "ចំនួនកុមារអាយុពី៦-៥៩ខែ បានទទួលគ្រាប់ថ្នាំជីវជាតិអាសម្រាប់ការពារ"}, {"sec": "កម្មវិធីជាតិអាហាររូបត្ថម្ភ", "no": 3, "name": "ចំនួនកុមារអាយុពី១២-៥៩ខែ បានទទួលថ្នាំម៉េបង់ដាហ្សុល"}, {"sec": "កម្មវិធីជាតិអាហាររូបត្ថម្ភ", "no": 4, "name": "ចំនួនស្ត្រីផ្ទៃពោះទទួលគ្រាប់ថ្នាំជាតិដែក/អាស៊ីដហ្វូលីកចំនួន៩០គ្រាប់សម្រាប់ការពារ"}, {"sec": "កម្មវិធីជាតិអាហាររូបត្ថម្ភ", "no": 5, "name": "ចំនួនស្ត្រីស្ត្រីផ្ទៃពោះទទួលគ្រាប់ថ្នាំវីតាមីនចម្រុះ១៨០គ្រាប់"}, {"sec": "កម្មវិធីជាតិអាហាររូបត្ថម្ភ", "no": 6, "name": "ចំនួនស្ត្រីក្រោយសម្រាលទទួលគ្រាប់ថ្នាំជាតិដែក អាស៊ីតហ្វូលីក៤២គ្រាប់សម្រាប់ការពារ"}, {"sec": "កម្មវិធីជាតិអាហាររូបត្ថម្ភ", "no": 7, "name": "ចំនួនស្រ្តីវ័យបន្តពូជ១៥-៤៩ឆ្នាំទទួលគ្រាប់ថ្នាំជាតិដែក អាស៊ីត ហ្វូលីកប្រចាំសប្តាហ៍ (KK)"}, {"sec": "កម្មវិធីជាតិអាហាររូបត្ថម្ភ", "no": 8, "name": "កុមារអាយុក្រោម៥ឆ្នាំបានពិនិត្យតាមដាន ​និងលើកកំពស់ការលូតលាស់ករណីថ្មី"}, {"sec": "កម្មវិធីជាតិអាហាររូបត្ថម្ភ", "no": 9, "name": "កុមារអាយុក្រោម៥ឆ្នាំបានពិនិត្យតាមដាន ​និងលើកកំពស់ការលូតលាស់ករណីចាស់"}, {"sec": "កម្មវិធីជាតិអាហាររូបត្ថម្ភ", "no": 10, "name": "ចំនួនកុមារដាក់ចូលក្នុងកម្មវិធីថែទាំព្យាបាលបញ្ហាកង្វះអាហារូបត្ថម្ភស្រួចស្រាល់ធ្ងន់ធ្ងរ ​​(គ្មានផលវិបាក) [៦-៥៩ខែ]"}, {"sec": "កម្មវិធីជាតិអាហាររូបត្ថម្ភ", "no": 11, "name": "ចំនួនកុមារជាសះស្បើយ(កង្វះអាហារូបត្ថម្ភស្រួចស្រាល់ធ្ងន់ធ្ងរគ្មានផលវិបាក) [៦-៥៩ខែ]"}, {"sec": "កម្មវិធីជាតិអាហាររូបត្ថម្ភ", "no": 12, "name": "ចំនួនកុមារបោះបង់ការព្យាបាល (កង្វះអាហារូបត្ថម្ភស្រួចស្រាល់ធ្ងន់ធ្ងរគ្មានផលវិបាក) [៦-៥៩ខែ]"}], "title": "NNP — កម្មវិធីជាតិអាហាររូបត្ថម្ភ"}, {"code": "PMTCTC", "items": [{"sec": "កម្មវិធីជាតិ PMTCT", "no": 1, "name": "ចំនួន​ស្ត្រីមានគភ៌បានធ្វើតេស្តរកមេរោគHIV/SYP"}, {"sec": "កម្មវិធីជាតិ PMTCT", "no": 2, "name": "ចំនួន​ស្ត្រីមានគភ៌វិជ្ជមានមេរោគអេដស៍"}, {"sec": "កម្មវិធីជាតិ PMTCT", "no": 3, "name": "ចំនួន​ស្ត្រីមានគភ៌វិជ្ជមានមេរោគអេដស៍បានព្យាបាល"}, {"sec": "កម្មវិធីជាតិ PMTCT", "no": 4, "name": "ចំនួន​ស្ត្រីមានគភ៌វិជ្ជមានមេរោគស្វាយ"}, {"sec": "កម្មវិធីជាតិ PMTCT", "no": 5, "name": "ចំនួន​ស្ត្រីមានគភ៌វិជ្ជមានមេរោគស្វាយបានព្យាបាល"}, {"sec": "កម្មវិធីជាតិ PMTCT", "no": 6, "name": "ចំនួន​ដៃគូវិជ្ជមានមេរោគស្វាយបានព្យាបាល"}, {"sec": "កម្មវិធីជាតិ PMTCT", "no": 7, "name": "ចំនួនស្ត្រីមានគភ៌បានធ្វើតេស្ដរកមេរោគថ្លើមប្រភេទបេ"}, {"sec": "កម្មវិធីជាតិ PMTCT", "no": 8, "name": "ចំនួនស្ត្រីមានគភ៌វិជ្ជមានមេរោគថ្លើមប្រភេទបេ"}, {"sec": "កម្មវិធីជាតិ PMTCT", "no": 9, "name": "ចំនួនស្ត្រីមានគភ៌វិជ្ជមានមេរោគថ្លើមប្រភេទបេបានព្យាបាល"}, {"sec": "កម្មវិធីជាតិ PMTCT", "no": 10, "name": "ចំនួនម្តាយសម្រាលបានធ្វើតេស្តរកមេរោគHIV/SYP"}, {"sec": "កម្មវិធីជាតិ PMTCT", "no": 11, "name": "ចំនួនម្តាយសម្រាលវិជ្ជមានមេរោគHIV"}, {"sec": "កម្មវិធីជាតិ PMTCT", "no": 12, "name": "ចំនួនម្តាយសម្រាលវិជ្ជមានមេរោគHIVបាន ART"}, {"sec": "កម្មវិធីជាតិ PMTCT", "no": 13, "name": "ចំនួនទារកប្រឈមវិជ្ជមានមេរោគអេដស៍"}, {"sec": "កម្មវិធីជាតិ PMTCT", "no": 14, "name": "ចំនួនទារកប្រឈមវិជ្ជមានមេរោគអេដស៍ទទួល ARV"}, {"sec": "កម្មវិធីជាតិ PMTCT", "no": 15, "name": "ចំនួនទារកប្រឈមវិជ្ជមានមេរោគអេដស៍ធ្វើ DNA PCR"}, {"sec": "កម្មវិធីជាតិ PMTCT", "no": 16, "name": "ចំនួនម្តាយសម្រាលវិជ្ជមានមេរោគស្វាយ"}, {"sec": "កម្មវិធីជាតិ PMTCT", "no": 17, "name": "ចំនួនម្តាយសម្រាលវិជ្ជមានមេរោគស្វាយបានព្យាបាល"}, {"sec": "កម្មវិធីជាតិ PMTCT", "no": 18, "name": "ចំនួនទារកប្រឈមដែលកើតពីម្តាយមានមេរោគស្វាយ"}, {"sec": "កម្មវិធីជាតិ PMTCT", "no": 19, "name": "ចំនួនទារកដែលមានមេរោគស្វាយពីកំណើត"}, {"sec": "កម្មវិធីជាតិ PMTCT", "no": 20, "name": "ចំនួនទារកដែលមានមេរោគស្វាយពីកំណើតបានព្យាបាល"}], "title": "PMTCTC — កម្មវិធីជាតិ PMTCT"}, {"code": "ARI.CDD", "items": [{"sec": "កម្មវិធី ARI/CDD", "no": 1, "name": "ចំនួនកុមារអាយុក្រោម ៥ឆ្នាំ ពិគ្រោះជំងឺករណីថ្មីសរុប នៅថ្នាក់មណ្ឌលសុខភាព"}, {"sec": "កម្មវិធី ARI/CDD", "no": 2, "name": "ចំនួនកុមារទទួលពិនិត្យតា ស.ព.ជ.ក ​(IMCI) សរុប (ថ្មី + ចាស់) នៅថ្នាក់មណ្ឌលសុខភាព", "link": 1}, {"sec": "កម្មវិធី ARI/CDD", "no": 3, "name": "ចំនួនកុមារអាយុក្រោម ៥ឆ្នាំ ពិគ្រោះជំងឺក្រៅ សរុប (ថ្មី + ចាស់) នៅថ្នាក់មណ្ឌលសុខភាព"}], "title": "ARI.CDD — ជំងឺរលាកផ្លូវដង្ហើមស្រួច រាក និងអាសន្នរោគ"}];
+const YEARS=['2026','2027','2028'],MONTHS=['មករា','កុម្ភៈ','មីនា','មេសា','ឧសភា','មិថុនា','កក្កដា','សីហា','កញ្ញា','តុលា','វិច្ឆិកា','ធ្នូ'];
+const $=id=>document.getElementById(id),opt=a=>a.map(x=>`<option>${x}</option>`).join('');
+$('hc').innerHTML='<option value="">— ជ្រើសរើស —</option>'+opt(HC);$('year').innerHTML=opt(YEARS);$('month').innerHTML='<option value="">— ជ្រើសរើស —</option>'+opt(MONTHS);
+$('code').value=localStorage.getItem('mch_code')||'';
+let html='',tabs='';
+PROGS.forEach((p,pi)=>{tabs+=`<button data-p="${pi}" class="${pi?'':'on'}">${p.code}</button>`;
+ html+=`<div class="panel" data-p="${pi}" ${pi?'hidden':''}><h3 style="margin:0 0 8px">${p.title}</h3><div style="overflow-x:auto"><table><tr><th></th><th>សូចនាករ</th><th>ចំនួន</th><th>គោលដៅ</th></tr>`;
+ let last='';p.items.forEach((it,k)=>{const id=`${p.code}_${k+1}`;
+  if(it.sec!==last){html+=`<tr class="sec"><td colspan="4">${it.sec}</td></tr>`;last=it.sec}
+  html+=`<tr><td class="n">${it.no}</td><td>${it.name}</td><td class="v"><input type="number" min="0" step="any" inputmode="decimal" data-id="${id}_c"></td><td class="v"><input type="number" min="0" step="any" inputmode="decimal" data-id="${id}_t" ${it.link?'disabled title="ដូចសូចនាករ ១"':''}></td></tr>`});
+ html+='</table></div></div>'});
+$('tabs').innerHTML=tabs;$('panels').innerHTML=html;
+const inputs=[...document.querySelectorAll('input[data-id]')];
+$('tabs').onclick=e=>{const b=e.target.closest('button');if(!b)return;document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x===b));document.querySelectorAll('.panel').forEach(x=>x.hidden=x.dataset.p!==b.dataset.p)};
+// ARI.CDD: គោលដៅសូចនាករ ២ ដូចសូចនាករ ១
+const q=id=>document.querySelector(`[data-id="${id}"]`);
+q('ARI.CDD_1_t').addEventListener('input',()=>{q('ARI.CDD_2_t').value=q('ARI.CDD_1_t').value});
+function say(t,c){$('msg').textContent=t;$('msg').className=c||''}
+function ready(){return $('hc').value&&$('year').value&&$('month').value}
+async function load(){
+ inputs.forEach(i=>i.value='');if(!ready()||API_URL.startsWith('PASTE'))return;
+ say('កំពុងផ្ទុកទិន្នន័យ...');
+ try{const r=await(await fetch(API_URL+'?'+new URLSearchParams({hc:$('hc').value,year:$('year').value,month:$('month').value,code:$('code').value}))).json();
+  if(r.error)return say(r.error,'err');
+  if(r.found){inputs.forEach(i=>{if(r.values[i.dataset.id]!==undefined)i.value=r.values[i.dataset.id]});say('បានផ្ទុកទិន្នន័យដែលបានបញ្ជូនពីមុន។ អាចកែហើយបញ្ជូនម្តងទៀត។','ok')}else say('')
+ }catch(e){say('មិនអាចផ្ទុកទិន្នន័យបាន។','err')}}
+['hc','year','month'].forEach(i=>$(i).onchange=load);
+$('rep').onclick=()=>{localStorage.setItem('mch_code',$('code').value);$('rep').href='report.html?'+new URLSearchParams({hc:$('hc').value,year:$('year').value})};
+$('send').onclick=async()=>{
+ if(!ready())return say('សូមជ្រើសរើសមណ្ឌលសុខភាព ឆ្នាំ និងខែ។','err');
+ if(API_URL.startsWith('PASTE'))return say('មិនទាន់កំណត់ API_URL។','err');
+ const values={};for(const i of inputs){const v=i.value.trim();if(v!==''&&!(Number(v)>=0))return say('សូមបញ្ចូលលេខ ≥ 0 ប៉ុណ្ណោះ។','err');values[i.dataset.id]=v}
+ $('send').disabled=true;say('កំពុងបញ្ជូន...');
+ try{const r=await(await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({hc:$('hc').value,year:$('year').value,month:$('month').value,code:$('code').value,values})})).json();
+  if(r.ok){localStorage.setItem('mch_code',$('code').value);say(r.updated?'បានកែប្រែទិន្នន័យរួចរាល់ ✓':'បានបញ្ជូនរួចរាល់ ✓','ok')}else say(r.error||'បរាជ័យ','err')
+ }catch(e){say('បញ្ជូនមិនបាន។ សូមពិនិត្យអ៊ីនធឺណិត ហើយព្យាយាមម្តងទៀត។','err')}
+ $('send').disabled=false};
+</script></body></html>
